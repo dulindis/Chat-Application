@@ -17,12 +17,22 @@
             <form action="/chat.html">
                 <label for="username">Display name</label>
                 <input type="text" name="username" placeholder="Display name" required>
+                <!-- <label for="room">Room</label>
+                <input type="text" name="room" placeholder="Room" required> -->
+
                 <label for="room">Room</label>
-                <input type="text" name="room" placeholder="Room" required>
+                <input type="text" name="room"  placeholder="Room"  list="rooms" required />
+                <datalist id="rooms">
+                    <!-- <option>Room one</option> -->
+                </datalist>
+
                 <button>Join</button>
             </form>
         </div>
     </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/mainPage.js"></script>
+
 </body>
 
 </html>

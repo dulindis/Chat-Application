@@ -11,8 +11,15 @@ const {
     addUser,
     removeUser,
     getUser,
-    getUsersInRoom
-} = require('./utils/users')
+    getUsersInRoom,
+    getAllUsers
+} = require('./utils/users');
+const {
+    updateRoom,
+    addRoom,
+    removeRoom,
+    getRooms
+} = require('./utils/rooms');
 
 const app = express();
 //we created serevr outise of the express library
@@ -27,6 +34,11 @@ app.use(express.static(publicDirectoryPath));
 io.on('connection', (socket) => {
     console.log('new WebSocket connection');
 
+    socket.on('getRooms', () => {
+        io.emit('roomList', getRooms())
+    });
+
+
     socket.on('join', (options, callback) => {
         const {
             error,
@@ -40,8 +52,11 @@ io.on('connection', (socket) => {
             return callback(error)
         }
 
-        socket.join(user.room)
+        socket.join(user.room);
 
+        addRoom(user.room);
+        updateRoom(user.room);
+        //getRooms();
         socket.emit('message', generateMessage('Admin', 'Welcome!'))
         socket.broadcast.to(user.room).emit('message', generateMessage('Admin', `${user.username} has joined!`));
 
@@ -71,15 +86,21 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        const user = removeUser(socket.id)
+        const user = removeUser(socket.id);
 
         if (user) {
+            console.log('discunnected user:', user);
+            removeRoom(user.room);
+            console.log('new list of rooms', getRooms());
+
             io.to(user.room).emit('message', generateMessage('Admin', `${user.username} has left!`));
             io.to(user.room).emit('roomData', {
                 room: user.room,
                 users: getUsersInRoom(user.room)
             })
-        }
+        };
+
+
     })
 })
 
